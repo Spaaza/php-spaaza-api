@@ -1,6 +1,20 @@
 {
     "name": "Spaaza/php-spaaza-api",
-    "version": "1.0",
+    "description": "PHP client code for interacting with the Spaaza API",
+    "version": "1.0.0",
+
+    "homepage": "http://spaaza.com/",
+    "license": "MIT",
+
+    "authors": [
+        {
+            "name": "Arjan Scherpenisse",
+            "email": "arjan@miraclethings.nl",
+            "homepage": "http://www.miraclethings.nl",
+            "role": "Developer"
+        }
+    ],
+
     "autoload": {
         "psr-0": {
             "spaaza\\client": "src/"
