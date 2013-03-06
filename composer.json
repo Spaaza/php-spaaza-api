@@ -1,4 +1,6 @@
 {
+    "name": "Spaaza/php-spaaza-api",
+    "version": "1.0",
     "autoload": {
         "psr-0": {
             "spaaza\\client": "src/"
