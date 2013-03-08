@@ -78,12 +78,10 @@ class Client
         if (is_array($auth)) {
             if (isset($auth['session_key']))
                 $headers[] = 'Session-Key: ' . $auth['session_key'];
-            if (isset($auth['auth_method']))
-                $headers[] = 'Session-Auth-Method: ' . $auth['auth_method'];
-            if (isset($auth['username']))
-                $headers[] = 'Session-Username: ' . $auth['username'];
             if (isset($auth['user_id']))
                 $headers[] = 'Session-User-Id: ' . $auth['user_id'];
+            if (isset($auth['username']))
+                $headers[] = 'Session-Username: ' . $auth['username'];
         }
 
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
