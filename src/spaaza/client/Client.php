@@ -9,6 +9,8 @@ class Client
 {
     protected $base;
 
+    protected $myprice_app_hostname;
+    
     /**
      * Construct a client instance.
      * @param $base_url - the base URL to use; e.g. https://apitest0.spaaza.com/
@@ -19,6 +21,13 @@ class Client
         $this->base = $base_url  . $version . '/';
     }
 
+    /**
+     * Sets the hostname of the current myprice app, if any.
+     */
+    public function setMyPriceAppHostname($hostname) {
+        $this->myprice_app_hostname = $hostname;
+    }
+    
     /** 
      * Do an API GET request
      */
@@ -83,7 +92,9 @@ class Client
             if (isset($auth['username']))
                 $headers[] = 'Session-Username: ' . $auth['username'];
         }
-
+        if (!empty($this->myprice_app_hostname))
+            $headers[] = 'X-MyPrice-App-Hostname: ' . $this->myprice_app_hostname;
+        
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         
         return $ch;
