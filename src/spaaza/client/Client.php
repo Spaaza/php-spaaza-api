@@ -10,6 +10,7 @@ class Client
     protected $base;
 
     protected $myprice_app_hostname;
+    protected $request_details = array();
     
     /**
      * Construct a client instance.
@@ -26,6 +27,10 @@ class Client
      */
     public function setMyPriceAppHostname($hostname) {
         $this->myprice_app_hostname = $hostname;
+    }
+
+    public function setRequestDetails($info) {
+        $this->request_details = $info;
     }
     
     /** 
@@ -94,6 +99,9 @@ class Client
         }
         if (!empty($this->myprice_app_hostname))
             $headers[] = 'X-MyPrice-App-Hostname: ' . $this->myprice_app_hostname;
+
+        if (!empty($this->request_details)) 
+            $headers[] = 'X-Spaaza-Request: ' . json_encode($this->request_details);
         
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         
