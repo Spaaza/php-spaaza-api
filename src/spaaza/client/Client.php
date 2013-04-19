@@ -68,6 +68,18 @@ class Client
     }
 
     /** 
+     * Do an API PUT request
+     */
+    public function putRequest($path, array $params = array(), $auth = null) {
+        $url = $this->base . $path;
+        $ch = $this->initCurl($url, $auth);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+        return $this->execCurl($ch);
+    }
+
+    /** 
      * Do an API JSON POST request
      */
     public function postJSONRequest($path, array $jsondata = array(), $auth = null) {
