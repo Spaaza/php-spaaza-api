@@ -11,6 +11,7 @@ class Client
 
     protected $myprice_app_hostname;
     protected $request_details = array();
+    protected $user_cookie = null;
     
     /**
      * Construct a client instance.
@@ -31,6 +32,10 @@ class Client
 
     public function setRequestDetails($info) {
         $this->request_details = $info;
+    }
+
+    public function setUserCookie($cookie) {
+        $this->user_cookie = $cookie;
     }
     
     /** 
@@ -115,6 +120,9 @@ class Client
         if (!empty($this->request_details)) 
             $headers[] = 'X-Spaaza-Request: ' . json_encode($this->request_details);
         
+        if (!empty($this->user_cookie)) 
+            $headers[] = 'X-Spaaza-UserCookie: ' . $this->user_cookie;
+
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         
         return $ch;
