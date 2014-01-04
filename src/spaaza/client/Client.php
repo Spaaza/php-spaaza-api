@@ -8,11 +8,11 @@ namespace spaaza\client;
 class Client
 {
     protected $base;
+    protected $throwExceptions = false;
 
     protected $myprice_app_hostname;
     protected $request_details = array();
     protected $user_cookie = null;
-    
     /**
      * Construct a client instance.
      * @param $base_url - the base URL to use; e.g. https://apitest0.spaaza.com/
@@ -23,6 +23,9 @@ class Client
         $this->base = $base_url  . $version . '/';
     }
 
+    public function setThrowExceptions($flag) {
+        $this->throwExceptions = $flag;
+    }
     /**
      * Sets the hostname of the current myprice app, if any.
      */
@@ -136,7 +139,18 @@ class Client
         if ($result === NULL) {
             throw new \Exception("Invalid JSON response in API call: " . $body);
         }
-        return $result;
+
+        if ($this->throwExceptions) {
+            if (!empty($result['errors'])) {
+                throw new APIException($result['errors']);
+            }
+
+            // only return the 'result' response part
+            return $result['results'];
+            
+        } else {
+            return $result;
+        }
     }
     
 }
