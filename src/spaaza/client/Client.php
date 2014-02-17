@@ -13,6 +13,8 @@ class Client
     protected $myprice_app_hostname;
     protected $request_details = array();
     protected $user_cookie = null;
+    protected $blindlyAcceptAllCerts = false;
+
     /**
      * Construct a client instance.
      * @param $base_url - the base URL to use; e.g. https://apitest0.spaaza.com/
@@ -39,6 +41,10 @@ class Client
 
     public function setUserCookie($cookie) {
         $this->user_cookie = $cookie;
+    }
+
+    public function setBlindlyAcceptAllCerts($flag) {
+	$this->blindlyAcceptAllCerts = $flag;
     }
     
     /** 
@@ -108,6 +114,9 @@ class Client
         $headers = array_merge($extra_headers, array('Cache-Control: private', 'Connection: Keep-Alive'));
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	if ($this->blindlyAcceptAllCerts) {
+	    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+	}
 
         if (is_array($auth)) {
             if (isset($auth['session_key']))
@@ -134,7 +143,7 @@ class Client
     private function execCurl($ch) {
         $body = curl_exec($ch);
 
-	$curl_error;
+	$curl_error = null;
 	if(curl_exec($ch) === false)
 	{
 	    $curl_error = curl_error($ch);
