@@ -133,7 +133,17 @@ class Client
 
     private function execCurl($ch) {
         $body = curl_exec($ch);
+
+	$curl_error;
+	if(curl_exec($ch) === false)
+	{
+	    $curl_error = curl_error($ch);
+	}
         curl_close($ch);
+
+	if ($curl_error) {
+	    throw new \Exception("curl error: " . $curl_error);
+	}
 
         $result = json_decode($body, true);
         if ($result === NULL) {
