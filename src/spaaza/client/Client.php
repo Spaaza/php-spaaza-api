@@ -144,7 +144,7 @@ class Client
         $body = curl_exec($ch);
 
 	$curl_error = null;
-	if(curl_exec($ch) === false)
+	if ($body === false)
 	{
 	    $curl_error = curl_error($ch);
 	}
