@@ -28,12 +28,21 @@ class Client
     public function setThrowExceptions($flag) {
         $this->throwExceptions = $flag;
     }
+
     /**
      * Sets the hostname of the current myprice app, if any.
      */
     public function setMyPriceAppHostname($hostname) {
         $this->myprice_app_hostname = $hostname;
     }
+
+    /**
+     * Gets the hostname of the current myprice app, if any.
+     */
+    public function getMyPriceAppHostname() {
+        return $this->myprice_app_hostname;
+    }
+
 
     public function setRequestDetails($info) {
         $this->request_details = $info;
