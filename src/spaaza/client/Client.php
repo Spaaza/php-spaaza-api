@@ -62,7 +62,7 @@ class Client
 
         $extra_headers = array();
         if (isset($authorization_value)) {
-            $extra_headers = ['Authorization: ' . $authorization_value];
+            $extra_headers = array('Authorization: ' . $authorization_value);
         }
         $ch = $this->initCurl($url, $auth, $extra_headers);
         return $this->execCurl($ch);
