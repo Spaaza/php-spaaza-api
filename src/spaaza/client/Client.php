@@ -13,6 +13,7 @@ class Client
     protected $myprice_app_hostname;
     protected $request_details = array();
     protected $user_cookie = null;
+    protected $on_behalf_of = null;
     protected $blindlyAcceptAllCerts = false;
 
     /**
@@ -28,21 +29,12 @@ class Client
     public function setThrowExceptions($flag) {
         $this->throwExceptions = $flag;
     }
-
     /**
      * Sets the hostname of the current myprice app, if any.
      */
     public function setMyPriceAppHostname($hostname) {
         $this->myprice_app_hostname = $hostname;
     }
-
-    /**
-     * Gets the hostname of the current myprice app, if any.
-     */
-    public function getMyPriceAppHostname() {
-        return $this->myprice_app_hostname;
-    }
-
 
     public function setRequestDetails($info) {
         $this->request_details = $info;
@@ -52,22 +44,31 @@ class Client
         $this->user_cookie = $cookie;
     }
 
-    public function setBlindlyAcceptAllCerts($flag) {
-	$this->blindlyAcceptAllCerts = $flag;
+    public function setOnBehalfOf($username) {
+        $this->on_behalf_of = $username;
     }
-    
-    /** 
+
+    public function setBlindlyAcceptAllCerts($flag) {
+        $this->blindlyAcceptAllCerts = $flag;
+    }
+
+    /**
      * Do an API GET request
      */
-    public function getRequest($path, array $params = null, $auth = null) {
+    public function getRequest($path, array $params = null, $auth = null, $authorization_value = null) {
         $url = $this->base . $path;
         if (is_array($params))
             $url .= '?' . http_build_query($params);
-        $ch = $this->initCurl($url, $auth);
+
+        $extra_headers = array();
+        if (isset($authorization_value)) {
+            $extra_headers = ['Authorization: ' . $authorization_value];
+        }
+        $ch = $this->initCurl($url, $auth, $extra_headers);
         return $this->execCurl($ch);
     }
 
-    /** 
+    /**
      * Do an API POST request
      */
     public function postRequest($path, array $params = array(), $auth = null) {
@@ -78,7 +79,7 @@ class Client
         return $this->execCurl($ch);
     }
 
-    /** 
+    /**
      * Do an API DELETE request
      */
     public function deleteRequest($path, array $params = array(), $auth = null) {
@@ -90,7 +91,7 @@ class Client
         return $this->execCurl($ch);
     }
 
-    /** 
+    /**
      * Do an API PUT request
      */
     public function putRequest($path, array $params = array(), $auth = null) {
@@ -102,12 +103,12 @@ class Client
         return $this->execCurl($ch);
     }
 
-    /** 
+    /**
      * Do an API JSON POST request
      */
     public function postJSONRequest($path, array $jsondata = array(), $auth = null) {
         $url = $this->base . $path;
-        $ch = $this->initCurl($url, $auth, array('Content-type: application/json')); 
+        $ch = $this->initCurl($url, $auth, array('Content-type: application/json'));
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($jsondata));
         return $this->execCurl($ch);
@@ -123,9 +124,9 @@ class Client
         $headers = array_merge($extra_headers, array('Cache-Control: private', 'Connection: Keep-Alive'));
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	if ($this->blindlyAcceptAllCerts) {
-	    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-	}
+        if ($this->blindlyAcceptAllCerts) {
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        }
 
         if (is_array($auth)) {
             if (isset($auth['session_key']))
@@ -138,30 +139,33 @@ class Client
         if (!empty($this->myprice_app_hostname))
             $headers[] = 'X-MyPrice-App-Hostname: ' . $this->myprice_app_hostname;
 
-        if (!empty($this->request_details)) 
+        if (!empty($this->request_details))
             $headers[] = 'X-Spaaza-Request: ' . json_encode($this->request_details);
-        
-        if (!empty($this->user_cookie)) 
+
+        if (!empty($this->user_cookie))
             $headers[] = 'X-Spaaza-UserCookie: ' . $this->user_cookie;
 
+        if (!empty($this->on_behalf_of))
+            $headers[] = 'X-Spaaza-On-Behalf-Of: ' . $this->on_behalf_of;
+
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        
+
         return $ch;
     }
 
     private function execCurl($ch) {
         $body = curl_exec($ch);
 
-	$curl_error = null;
-	if ($body === false)
-	{
-	    $curl_error = curl_error($ch);
-	}
+        $curl_error = null;
+        if ($body === false)
+        {
+            $curl_error = curl_error($ch);
+        }
         curl_close($ch);
 
-	if ($curl_error) {
-	    throw new \Exception("curl error: " . $curl_error);
-	}
+        if ($curl_error) {
+            throw new \Exception("curl error: " . $curl_error);
+        }
 
         $result = json_decode($body, true);
         if ($result === NULL) {
@@ -175,10 +179,10 @@ class Client
 
             // only return the 'result' response part
             return $result['results'];
-            
+
         } else {
             return $result;
         }
     }
-    
+
 }
