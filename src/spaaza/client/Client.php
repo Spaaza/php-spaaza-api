@@ -55,31 +55,21 @@ class Client
     /**
      * Do an API GET request
      */
-    public function getRequest($path, array $params = null, $auth = null, $authorization_value = null) {
+    public function getRequest($path, array $params = null, $auth = null) {
         $url = $this->base . $path;
         if (is_array($params))
             $url .= '?' . http_build_query($params);
 
-        $extra_headers = array();
-        if (isset($authorization_value)) {
-            $extra_headers = array('Authorization: ' . $authorization_value);
-        }
-        $ch = $this->initCurl($url, $auth, $extra_headers);
+        $ch = $this->initCurl($url, $auth);
         return $this->execCurl($ch);
     }
 
     /**
      * Do an API POST request
      */
-    public function postRequest($path, array $params = array(), $auth = null, $authorization_value = null) {
+    public function postRequest($path, array $params = array(), $auth = null) {
         $url = $this->base . $path;
-
-        $extra_headers = array();
-        if (isset($authorization_value)) {
-            $extra_headers = array('Authorization: ' . $authorization_value);
-        }
-
-        $ch = $this->initCurl($url, $auth, $extra_headers);
+        $ch = $this->initCurl($url, $auth);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
         return $this->execCurl($ch);
@@ -112,13 +102,10 @@ class Client
     /**
      * Do an API JSON POST request
      */
-    public function postJSONRequest($path, array $jsondata = array(), $auth = null, $authorization_value = null) {
+    public function postJSONRequest($path, array $jsondata = array(), $auth = null) {
         $url = $this->base . $path;
 
         $extra_headers = array('Content-type: application/json');
-        if (isset($authorization_value)) {
-            $extra_headers = array_merge($extra_headers, array('Authorization: ' . $authorization_value));
-        }
 
         $ch = $this->initCurl($url, $auth, $extra_headers);
         curl_setopt($ch, CURLOPT_POST, true);
@@ -147,6 +134,8 @@ class Client
                 $headers[] = 'Session-User-Id: ' . $auth['user_id'];
             if (isset($auth['username']))
                 $headers[] = 'Session-Username: ' . $auth['username'];
+        } elseif (is_string($auth)) {
+            $headers[] =  'Authorization: Bearer ' . $auth;
         }
         if (!empty($this->myprice_app_hostname))
             $headers[] = 'X-MyPrice-App-Hostname: ' . $this->myprice_app_hostname;
