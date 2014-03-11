@@ -71,9 +71,15 @@ class Client
     /**
      * Do an API POST request
      */
-    public function postRequest($path, array $params = array(), $auth = null) {
+    public function postRequest($path, array $params = array(), $auth = null, $authorization_value = null) {
         $url = $this->base . $path;
-        $ch = $this->initCurl($url, $auth);
+
+        $extra_headers = array();
+        if (isset($authorization_value)) {
+            $extra_headers = array('Authorization: ' . $authorization_value);
+        }
+
+        $ch = $this->initCurl($url, $auth, $extra_headers);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
         return $this->execCurl($ch);
@@ -106,9 +112,15 @@ class Client
     /**
      * Do an API JSON POST request
      */
-    public function postJSONRequest($path, array $jsondata = array(), $auth = null) {
+    public function postJSONRequest($path, array $jsondata = array(), $auth = null, $authorization_value = null) {
         $url = $this->base . $path;
-        $ch = $this->initCurl($url, $auth, array('Content-type: application/json'));
+
+        $extra_headers = array('Content-type: application/json');
+        if (isset($authorization_value)) {
+            $extra_headers = array_merge($extra_headers, array('Authorization: ' . $authorization_value));
+        }
+
+        $ch = $this->initCurl($url, $auth, $extra_headers);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($jsondata));
         return $this->execCurl($ch);
