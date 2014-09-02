@@ -15,7 +15,8 @@ class Client
     protected $user_cookie = null;
     protected $on_behalf_of = null;
     protected $blindlyAcceptAllCerts = false;
-
+    protected $locale = null;
+    
     /**
      * Construct a client instance.
      * @param $base_url - the base URL to use; e.g. https://apitest0.spaaza.com/
@@ -52,7 +53,11 @@ class Client
         $this->blindlyAcceptAllCerts = $flag;
     }
 
-    /**
+    public function setLocale($locale) {
+        $this->locale = $locale;
+    }
+    
+    /** 
      * Do an API GET request
      */
     public function getRequest($path, array $params = null, $auth = null) {
@@ -149,6 +154,9 @@ class Client
         if (!empty($this->on_behalf_of))
             $headers[] = 'X-Spaaza-On-Behalf-Of: ' . $this->on_behalf_of;
 
+        if (!empty($this->locale)) 
+            $headers[] = 'Accept-Language: ' . $this->locale;
+        
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
         return $ch;
