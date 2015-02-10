@@ -80,6 +80,17 @@ class Client
         return $this->execCurl($ch);
     }
 
+     /**
+     * Do an API POST request
+     */
+    public function postRequest2($path, array $params = array(), $auth = null) {
+        $url = $this->base . $path;
+        $ch = $this->initCurl($url, $auth);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
+        return $this->execCurl($ch);
+    }
+
     /**
      * Do an API DELETE request
      */
