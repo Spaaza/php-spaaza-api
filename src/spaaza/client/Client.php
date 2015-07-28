@@ -16,6 +16,7 @@ class Client
     protected $on_behalf_of = null;
     protected $blindlyAcceptAllCerts = false;
     protected $locale = null;
+    protected $api_version = null;
     
     /**
      * Construct a client instance.
@@ -55,6 +56,10 @@ class Client
 
     public function setLocale($locale) {
         $this->locale = $locale;
+    }
+
+    public function setApiVersion($api_version) {
+        $this->api_version = $api_version;
     }
     
     /** 
@@ -167,6 +172,9 @@ class Client
 
         if (!empty($this->locale)) 
             $headers[] = 'Accept-Language: ' . $this->locale;
+
+        if (!empty($this->api_version)) 
+            $headers[] = 'X-Spaaza-API-Version: ' . $this->api_version;
         
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
