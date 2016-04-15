@@ -1,7 +1,7 @@
 {
   "name": "Spaaza/php-spaaza-api",
   "description": "PHP client code for interacting with the Spaaza API",
-  "version": "1.3.2",
+  "version": "1.4.0",
 
   "homepage": "http://spaaza.com/",
   "license": "MIT",
@@ -16,6 +16,13 @@
   "autoload": {
     "psr-0": {
       "spaaza\\client": "src/"
+    },
+    "psr-4": {
+      "spaaza\\client\\": "src/"
     }
+  },
+  "require": {
+    "guzzlehttp/guzzle": "~6.2"
   }
 }
+

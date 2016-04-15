@@ -2,38 +2,44 @@
 
 namespace spaaza\client;
 
+use Psr\Http\Message\ResponseInterface;
+
 /**
  * A PHP client for interacting with the Spaaza API.
  */
 class Client
 {
-    protected $base;
     protected $throwExceptions = false;
 
     protected $myprice_app_hostname;
     protected $request_details = array();
     protected $user_cookie = null;
     protected $on_behalf_of = null;
-    protected $blindlyAcceptAllCerts = false;
     protected $locale = null;
     protected $api_version = null;
+
+    protected $guzzle_client;
     
     /**
      * Construct a client instance.
-     * @param $base_url - the base URL to use; e.g. https://apitest0.spaaza.com/
+     *
+     * @param $base_url - the base URL to use: e.g. https://apitest0.spaaza.com/
      * @param $version - the API version this client will use. Will be used to construct the API base url.
      */
     public function __construct($base_url, $version='v1')
     {
-        $this->base = $base_url  . $version . '/';
+        $this->guzzle_client = new \GuzzleHttp\Client(
+            [
+                'base_uri'  => $base_url . $version . '/',
+                'verify'    => false
+            ]
+        );
     }
 
     public function setThrowExceptions($flag) {
         $this->throwExceptions = $flag;
     }
-    /**
-     * Sets the hostname of the current myprice app, if any.
-     */
+
     public function setMyPriceAppHostname($hostname) {
         $this->myprice_app_hostname = $hostname;
     }
@@ -50,10 +56,6 @@ class Client
         $this->on_behalf_of = $username;
     }
 
-    public function setBlindlyAcceptAllCerts($flag) {
-        $this->blindlyAcceptAllCerts = $flag;
-    }
-
     public function setLocale($locale) {
         $this->locale = $locale;
     }
@@ -61,93 +63,116 @@ class Client
     public function setApiVersion($api_version) {
         $this->api_version = $api_version;
     }
-    
-    /** 
-     * Do an API GET request
+
+    /**
+     * Do an API GET request.
+     *
+     * @param $path
+     * @param array $params
+     * @param array $auth
+     * @return array
+     * @throws APIException
      */
     public function getRequest($path, array $params = null, $auth = null) {
-        $url = $this->base . $path;
-        if (is_array($params))
-            $url .= '?' . http_build_query($params);
+        $res = $this->guzzle_client->get($path,
+            [
+                'headers' => $this->headersForRequest($auth),
+                'query' => $params
+            ]
+        );
 
-        $ch = $this->initCurl($url, $auth);
-        return $this->execCurl($ch);
+        return $this->handleResponse($res);
     }
 
     /**
-     * Do an API POST request
+     * Do an API POST request.
+     *
+     * @param $path
+     * @param array $params
+     * @param array $auth
+     * @return array
+     * @throws APIException
      */
     public function postRequest($path, array $params = array(), $auth = null) {
-        $url = $this->base . $path;
-        $ch = $this->initCurl($url, $auth);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
-        return $this->execCurl($ch);
-    }
+        $res = $this->guzzle_client->post($path,
+            [
+                'headers' => $this->headersForRequest($auth),
+                'form_params' => $params
+            ]
+        );
 
-     /**
-     * Do an API POST request
-     */
-    public function postRequest2($path, array $params = array(), $auth = null) {
-        $url = $this->base . $path;
-        $ch = $this->initCurl($url, $auth);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
-        return $this->execCurl($ch);
+        return $this->handleResponse($res);
     }
 
     /**
-     * Do an API DELETE request
-     */
-    public function deleteRequest($path, array $params = array(), $auth = null) {
-        $url = $this->base . $path;
-        $ch = $this->initCurl($url, $auth);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
-        return $this->execCurl($ch);
-    }
-
-    /**
-     * Do an API PUT request
-     */
-    public function putRequest($path, array $params = array(), $auth = null) {
-        $url = $this->base . $path;
-        $ch = $this->initCurl($url, $auth);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
-        return $this->execCurl($ch);
-    }
-
-    /**
-     * Do an API JSON POST request
+     * Do an API JSON POST request.
+     *
+     * @param $path
+     * @param array $jsondata
+     * @param array $auth
+     * @return array
+     * @throws APIException
      */
     public function postJSONRequest($path, array $jsondata = array(), $auth = null) {
-        $url = $this->base . $path;
+        $res = $this->guzzle_client->post($path,
+            [
+                'headers' => $this->headersForRequest($auth),
+                'json' => $jsondata
+            ]
+        );
 
-        $extra_headers = array('Content-type: application/json');
-
-        $ch = $this->initCurl($url, $auth, $extra_headers);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($jsondata));
-        return $this->execCurl($ch);
+        return $this->handleResponse($res);
     }
 
-
-    /*
-     * used to initialize a new connection resource.
+    /**
+     * Do an API DELETE request.
+     *
+     * @param $path
+     * @param array $params
+     * @param array $auth
+     * @return array
+     * @throws APIException
      */
-    private function initCurl($url, $auth = null, $extra_headers = array())
-    {
-        $ch = curl_init();
-        $headers = array_merge($extra_headers, array('Cache-Control: private', 'Connection: Keep-Alive'));
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        if ($this->blindlyAcceptAllCerts) {
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-        }
+    public function deleteRequest($path, array $params = array(), $auth = null) {
+        $res = $this->guzzle_client->delete($path,
+            [
+                'headers' => $this->headersForRequest($auth),
+                'form_params' => $params
+            ]
+        );
 
+        return $this->handleResponse($res);
+    }
+
+    /**
+     * Do an API PUT request.
+     *
+     * @param $path
+     * @param array $params
+     * @param array $auth
+     * @return array
+     * @throws APIException
+     */
+    public function putRequest($path, array $params = array(), $auth = null) {
+        $res = $this->guzzle_client->put($path,
+            [
+                'headers' => $this->headersForRequest($auth),
+                'form_params' => $params
+            ]
+        );
+
+        return $this->handleResponse($res);
+    }
+
+    /**
+     * Assemble the request headers.
+     *
+     * @param array $auth
+     * @param array $extra_headers
+     * @return array
+     */
+    protected function headersForRequest($auth = null, $extra_headers = array()) {
+        $headers = array_merge($extra_headers, array('Cache-Control: private', 'Connection: Keep-Alive'));
         if (is_array($auth)) {
             if (isset($auth['session_key']))
                 $headers[] = 'Session-Key: ' . $auth['session_key'];
@@ -170,42 +195,31 @@ class Client
         if (!empty($this->on_behalf_of))
             $headers[] = 'X-Spaaza-On-Behalf-Of: ' . $this->on_behalf_of;
 
-        if (!empty($this->locale)) 
+        if (!empty($this->locale))
             $headers[] = 'Accept-Language: ' . $this->locale;
 
-        if (!empty($this->api_version)) 
+        if (!empty($this->api_version))
             $headers[] = 'X-Spaaza-API-Version: ' . $this->api_version;
-        
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
-        return $ch;
+        return $headers;
     }
 
-    private function execCurl($ch) {
-        $body = curl_exec($ch);
-
-        $curl_error = null;
-        if ($body === false)
-        {
-            $curl_error = curl_error($ch);
-        }
-        curl_close($ch);
-
-        if ($curl_error) {
-            throw new \Exception("curl error: " . $curl_error);
-        }
-
+    /**
+     * Decode the response and handle errors.
+     *
+     * @param ResponseInterface $res
+     * @return array
+     * @throws APIException
+     */
+    protected function handleResponse($res)
+    {
+        $body = (string)$res->getBody();
         $result = json_decode($body, true);
-        if ($result === NULL) {
-            throw new \Exception("Invalid JSON response in API call: " . $body);
-        }
-
         if ($this->throwExceptions) {
             if (!empty($result['errors'])) {
                 throw new APIException($result['errors']);
             }
 
-            // only return the 'result' response part
             return $result['results'];
 
         } else {
