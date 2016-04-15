@@ -173,34 +173,38 @@ class Client
      * @return array
      */
     protected function headersForRequest($auth = null, $extra_headers = array()) {
-        $headers = array_merge($extra_headers, array('Cache-Control: private', 'Connection: Keep-Alive'));
+        $headers = array_merge($extra_headers, [
+                'Cache-Control' => 'private',
+                'Connection' => 'Keep-Alive'
+            ]
+        );
         if (is_array($auth)) {
             if (isset($auth['session_key']))
-                $headers[] = 'Session-Key: ' . $auth['session_key'];
+                $headers['Session-Key'] = $auth['session_key'];
             if (isset($auth['user_id']))
-                $headers[] = 'Session-User-Id: ' . $auth['user_id'];
+                $headers['Session-User-Id'] = (string)$auth['user_id'];
             if (isset($auth['username']))
-                $headers[] = 'Session-Username: ' . $auth['username'];
+                $headers['Session-Username'] = $auth['username'];
         } elseif (is_string($auth)) {
-            $headers[] =  'Authorization: Bearer ' . $auth;
+            $headers['Authorization'] = 'Bearer ' . $auth;
         }
         if (!empty($this->myprice_app_hostname))
-            $headers[] = 'X-MyPrice-App-Hostname: ' . $this->myprice_app_hostname;
+            $headers['X-MyPrice-App-Hostname'] = $this->myprice_app_hostname;
 
         if (!empty($this->request_details))
-            $headers[] = 'X-Spaaza-Request: ' . json_encode($this->request_details);
+            $headers['X-Spaaza-Request'] = json_encode($this->request_details);
 
         if (!empty($this->user_cookie))
-            $headers[] = 'X-Spaaza-UserCookie: ' . $this->user_cookie;
+            $headers['X-Spaaza-UserCookie'] = $this->user_cookie;
 
         if (!empty($this->on_behalf_of))
-            $headers[] = 'X-Spaaza-On-Behalf-Of: ' . $this->on_behalf_of;
+            $headers['X-Spaaza-On-Behalf-Of'] = $this->on_behalf_of;
 
         if (!empty($this->locale))
-            $headers[] = 'Accept-Language: ' . $this->locale;
+            $headers['Accept-Language'] = $this->locale;
 
         if (!empty($this->api_version))
-            $headers[] = 'X-Spaaza-API-Version: ' . $this->api_version;
+            $headers['X-Spaaza-API-Version'] = $this->api_version;
 
         return $headers;
     }
