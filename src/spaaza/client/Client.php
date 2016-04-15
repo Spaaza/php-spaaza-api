@@ -2,6 +2,7 @@
 
 namespace spaaza\client;
 
+use GuzzleHttp\Exception\ClientException;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -74,15 +75,14 @@ class Client
      * @return array
      * @throws APIException
      */
-    public function getRequest($path, array $params = null, $auth = null) {
-        $res = $this->guzzle_client->get($path,
+    public function getRequest($path, array $params = null, $auth = null)
+    {
+        return $this->makeRequest('GET', $path,
             [
                 'headers' => $this->headersForRequest($auth),
                 'query' => $params
             ]
         );
-
-        return $this->handleResponse($res);
     }
 
     /**
@@ -95,14 +95,12 @@ class Client
      * @throws APIException
      */
     public function postRequest($path, array $params = array(), $auth = null) {
-        $res = $this->guzzle_client->post($path,
+        return $this->makeRequest('POST', $path,
             [
                 'headers' => $this->headersForRequest($auth),
                 'form_params' => $params
             ]
         );
-
-        return $this->handleResponse($res);
     }
 
     /**
@@ -115,14 +113,12 @@ class Client
      * @throws APIException
      */
     public function postJSONRequest($path, array $jsondata = array(), $auth = null) {
-        $res = $this->guzzle_client->post($path,
+        return $this->makeRequest('POST', $path,
             [
                 'headers' => $this->headersForRequest($auth),
                 'json' => $jsondata
             ]
         );
-
-        return $this->handleResponse($res);
     }
 
     /**
@@ -135,14 +131,12 @@ class Client
      * @throws APIException
      */
     public function deleteRequest($path, array $params = array(), $auth = null) {
-        $res = $this->guzzle_client->delete($path,
+        return $this->makeRequest('DELETE', $path,
             [
                 'headers' => $this->headersForRequest($auth),
                 'form_params' => $params
             ]
         );
-
-        return $this->handleResponse($res);
     }
 
     /**
@@ -155,14 +149,12 @@ class Client
      * @throws APIException
      */
     public function putRequest($path, array $params = array(), $auth = null) {
-        $res = $this->guzzle_client->put($path,
+        return $this->makeRequest('PUT', $path,
             [
                 'headers' => $this->headersForRequest($auth),
                 'form_params' => $params
             ]
         );
-
-        return $this->handleResponse($res);
     }
 
     /**
@@ -230,6 +222,25 @@ class Client
         } else {
             return $result;
         }
+    }
+
+    /**
+     * @param string $method
+     * @param string $path
+     * @param array $params
+     * @return array
+     * @throws APIException
+     */
+    protected function makeRequest($method, $path, array $params)
+    {
+        $res = null;
+        try {
+            $res = $this->guzzle_client->request($method, $path, $params);
+        } catch (ClientException $ce) {
+            $res = $ce->getResponse();
+        }
+
+        return $this->handleResponse($res);
     }
 
 }
