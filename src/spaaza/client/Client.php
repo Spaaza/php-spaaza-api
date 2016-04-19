@@ -122,6 +122,33 @@ class Client
     }
 
     /**
+     * Do an API multipart POST request.
+     *
+     * @param $path
+     * @param array $params - expects an array of associative arrays, e.g.
+     *     [
+     *       [
+     *         'name'     => 'imagefile',
+     *         'contents' => fopen($this->test_image_path, 'r')],
+     *       [
+     *         'name'     => 'image_seq_num',
+     *         'contents' => 1
+     *       ],
+     *       ...
+     * @param array $auth
+     * @return array
+     * @throws APIException
+     */
+    public function postMultipartRequest($path, array $params = array(), $auth = null) {
+        return $this->makeRequest('POST', $path,
+            [
+                'headers' => $this->headersForRequest($auth),
+                'multipart' => $params
+            ]
+        );
+    }
+
+    /**
      * Do an API DELETE request.
      *
      * @param $path
