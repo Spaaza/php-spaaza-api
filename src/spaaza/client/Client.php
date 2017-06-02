@@ -204,6 +204,8 @@ class Client
                 $headers['Session-User-Id'] = (string)$auth['user_id'];
             if (isset($auth['username']))
                 $headers['Session-Username'] = $auth['username'];
+            if (isset($auth['chain_id']))
+                $headers['Session-Chain-Id'] = $auth['chain_id'];
         } elseif (is_string($auth)) {
             $headers['Authorization'] = 'Bearer ' . $auth;
         }
