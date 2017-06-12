@@ -58,6 +58,10 @@ class Client
         $this->on_behalf_of = $username;
     }
 
+    public function unsetOnBehalfOf() {
+        unset($this->on_behalf_of);
+    }
+
     public function setLocale($locale) {
         $this->locale = $locale;
     }
