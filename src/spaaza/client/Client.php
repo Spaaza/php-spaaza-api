@@ -46,6 +46,10 @@ class Client
         $this->myprice_app_hostname = $hostname;
     }
 
+    public function unsetMyPriceAppHostname() {
+        unset($this->myprice_app_hostname);
+    }
+
     public function setRequestDetails($info) {
         $this->request_details = $info;
     }
