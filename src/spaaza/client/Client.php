@@ -13,6 +13,7 @@ class Client
     protected $throwExceptions = false;
 
     protected $myprice_app_hostname;
+    protected $user_agent;
     protected $request_details = array();
     protected $user_cookie = null;
     protected $on_behalf_of = null;
@@ -72,6 +73,14 @@ class Client
 
     public function setApiVersion($api_version) {
         $this->api_version = $api_version;
+    }
+
+    public function setUserAgent($user_agent) {
+        $this->user_agent = $user_agent;
+    }
+
+    public function unsetUserAgent() {
+        unset($this->user_agent);
     }
 
     /**
@@ -217,6 +226,10 @@ class Client
         } elseif (is_string($auth)) {
             $headers['Authorization'] = 'Bearer ' . $auth;
         }
+
+        if (!empty($this->user_agent))
+            $headers['User-Agent'] = $this->user_agent;
+
         if (!empty($this->myprice_app_hostname))
             $headers['X-MyPrice-App-Hostname'] = $this->myprice_app_hostname;
 
