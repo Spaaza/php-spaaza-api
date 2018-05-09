@@ -19,6 +19,7 @@ class Client
     protected $on_behalf_of = null;
     protected $locale = null;
     protected $api_version = null;
+    protected $x_forwarded_for;
 
     protected $guzzle_client;
 
@@ -85,6 +86,14 @@ class Client
 
     public function unsetUserAgent() {
         unset($this->user_agent);
+    }
+
+    public function setXForwardedFor($x_forwarded_for) {
+        $this->x_forwarded_for = $x_forwarded_for;
+    }
+
+    public function unsetXForwardedFor() {
+        unset($this->x_forwarded_for);
     }
 
     /**
@@ -251,6 +260,9 @@ class Client
 
         if (!empty($this->api_version))
             $headers['X-Spaaza-API-Version'] = $this->api_version;
+
+        if (!empty($this->x_forwarded_for))
+            $headers['X-Forwarded-For'] = $this->x_forwarded_for;
 
         return $headers;
     }
