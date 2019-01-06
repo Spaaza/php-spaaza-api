@@ -1,6 +1,6 @@
 # Spaaza PHP Client #
 
-PHP Client for Spaaza API
+PHP Client to facilitate connection to the Spaaza API
 
 Example:
 
