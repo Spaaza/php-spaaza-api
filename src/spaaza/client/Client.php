@@ -27,14 +27,13 @@ class Client
      * Construct a client instance.
      *
      * @param $base_url - the base URL to use: e.g. https://apitest0.spaaza.com/
-     * @param string $version - the API version this client will use. Will be used to construct the API base url.
      * @param bool $verify_certs whether to verify server SSL certificates
      */
-    public function __construct($base_url, $version='v1', $verify_certs = true)
+    public function __construct($base_url, $verify_certs = true)
     {
         $this->guzzle_client = new \GuzzleHttp\Client(
             [
-                'base_uri'  => $base_url . $version . '/',
+                'base_uri'  => $base_url,
                 'verify'    => $verify_certs
             ]
         );

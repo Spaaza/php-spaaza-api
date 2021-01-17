@@ -4,7 +4,7 @@ PHP Client to facilitate connection to the Spaaza API
 
 Example:
 
-    $client = new \spaaza\client\Client('http://api0.spaaza.com/',  'v1');
+    $client = new \spaaza\client\Client('http://api0.spaaza.com/');
     var_dump($client->getRequest('public/search-products.json'));
 
 ## Updating with composer ##
