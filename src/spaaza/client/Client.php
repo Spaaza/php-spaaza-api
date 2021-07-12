@@ -104,11 +104,11 @@ class Client
      * @return array
      * @throws APIException
      */
-    public function getRequest($path, array $params = null, $auth = null)
+    public function getRequest($path, array $params = null, $auth = null, $extra_headers = array())
     {
         return $this->makeRequest('GET', $path,
             [
-                'headers' => $this->headersForRequest($auth),
+                'headers' => $this->headersForRequest($auth, $extra_headers),
                 'query' => $params
             ]
         );
@@ -123,10 +123,10 @@ class Client
      * @return array
      * @throws APIException
      */
-    public function postRequest($path, array $params = array(), $auth = null) {
+    public function postRequest($path, array $params = array(), $auth = null, $extra_headers = array()) {
         return $this->makeRequest('POST', $path,
             [
-                'headers' => $this->headersForRequest($auth),
+                'headers' => $this->headersForRequest($auth, $extra_headers),
                 'form_params' => $params
             ]
         );
@@ -141,10 +141,10 @@ class Client
      * @return array
      * @throws APIException
      */
-    public function postJSONRequest($path, array $jsondata = array(), $auth = null) {
+    public function postJSONRequest($path, array $jsondata = array(), $auth = null, $extra_headers = array()) {
         return $this->makeRequest('POST', $path,
             [
-                'headers' => $this->headersForRequest($auth),
+                'headers' => $this->headersForRequest($auth, $extra_headers),
                 'json' => $jsondata
             ]
         );
@@ -168,10 +168,10 @@ class Client
      * @return array
      * @throws APIException
      */
-    public function postMultipartRequest($path, array $params = array(), $auth = null) {
+    public function postMultipartRequest($path, array $params = array(), $auth = null, $extra_headers = array()) {
         return $this->makeRequest('POST', $path,
             [
-                'headers' => $this->headersForRequest($auth),
+                'headers' => $this->headersForRequest($auth, $extra_headers),
                 'multipart' => $params
             ]
         );
@@ -186,10 +186,10 @@ class Client
      * @return array
      * @throws APIException
      */
-    public function deleteRequest($path, array $params = array(), $auth = null) {
+    public function deleteRequest($path, array $params = array(), $auth = null, $extra_headers = array()) {
         return $this->makeRequest('DELETE', $path,
             [
-                'headers' => $this->headersForRequest($auth),
+                'headers' => $this->headersForRequest($auth, $extra_headers),
                 'form_params' => $params
             ]
         );
@@ -204,10 +204,10 @@ class Client
      * @return array
      * @throws APIException
      */
-    public function putRequest($path, array $params = array(), $auth = null) {
+    public function putRequest($path, array $params = array(), $auth = null, $extra_headers = array()) {
         return $this->makeRequest('PUT', $path,
             [
-                'headers' => $this->headersForRequest($auth),
+                'headers' => $this->headersForRequest($auth, $extra_headers),
                 'form_params' => $params
             ]
         );
