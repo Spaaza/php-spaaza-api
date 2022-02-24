@@ -1,7 +1,7 @@
 {
-  "name": "Spaaza/php-spaaza-api",
+  "name": "spaaza/php-spaaza-api",
   "description": "PHP client code for interacting with the Spaaza API",
-  "version": "1.5.1",
+  "version": "1.6.0",
 
   "homepage": "http://spaaza.com/",
   "license": "MIT",
@@ -22,7 +22,7 @@
     }
   },
   "require": {
-    "guzzlehttp/guzzle": "~6.2"
+    "guzzlehttp/guzzle": "^7.0"
   }
 }
 

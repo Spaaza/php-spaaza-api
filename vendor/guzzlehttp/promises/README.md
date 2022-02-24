@@ -26,7 +26,7 @@ for a general introduction to promises.
 - Promises can be cancelled.
 - Works with any object that has a `then` function.
 - C# style async/await coroutine promises using
-  `GuzzleHttp\Promise\coroutine()`.
+  `GuzzleHttp\Promise\Coroutine::of()`.
 
 
 # Quick start
@@ -88,7 +88,7 @@ $promise
     });
 
 // Resolving the promise triggers the $onFulfilled callbacks and outputs
-// "Hello, reader".
+// "Hello, reader."
 $promise->resolve('reader.');
 ```
 
@@ -96,7 +96,7 @@ $promise->resolve('reader.');
 ## Promise forwarding
 
 Promises can be chained one after the other. Each then in the chain is a new
-promise. The return value of of a promise is what's forwarded to the next
+promise. The return value of a promise is what's forwarded to the next
 promise in the chain. Returning a promise in a `then` callback will cause the
 subsequent promises in the chain to only be fulfilled when the returned promise
 has been fulfilled. The next promise in the chain will be invoked with the
@@ -150,7 +150,7 @@ use GuzzleHttp\Promise\Promise;
 
 $promise = new Promise();
 $promise->then(null, function ($reason) {
-    throw new \Exception($reason);
+    throw new Exception($reason);
 })->then(null, function ($reason) {
     assert($reason->getMessage() === 'Error!');
 });
@@ -182,7 +182,6 @@ invoked using the value returned from the `$onRejected` callback.
 
 ```php
 use GuzzleHttp\Promise\Promise;
-use GuzzleHttp\Promise\RejectedPromise;
 
 $promise = new Promise();
 $promise
@@ -208,7 +207,7 @@ of the promise is called.
 
 ```php
 $promise = new Promise(function () use (&$promise) {
-    $promise->deliver('foo');
+    $promise->resolve('foo');
 });
 
 // Calling wait will return the value of the promise.
@@ -220,18 +219,18 @@ the promise is rejected with the exception and the exception is thrown.
 
 ```php
 $promise = new Promise(function () use (&$promise) {
-    throw new \Exception('foo');
+    throw new Exception('foo');
 });
 
 $promise->wait(); // throws the exception.
 ```
 
 Calling `wait` on a promise that has been fulfilled will not trigger the wait
-function. It will simply return the previously delivered value.
+function. It will simply return the previously resolved value.
 
 ```php
 $promise = new Promise(function () { die('this is not called!'); });
-$promise->deliver('foo');
+$promise->resolve('foo');
 echo $promise->wait(); // outputs "foo"
 ```
 
@@ -268,7 +267,7 @@ $promise->reject('foo');
 $promise->wait(false);
 ```
 
-When unwrapping a promise, the delivered value of the promise will be waited
+When unwrapping a promise, the resolved value of the promise will be waited
 upon until the unwrapped value is not a promise. This means that if you resolve
 promise A with a promise B and unwrap promise A, the value returned by the
 wait function will be the value delivered to promise B.
@@ -315,8 +314,11 @@ A promise has the following methods:
 
 - `then(callable $onFulfilled, callable $onRejected) : PromiseInterface`
   
-  Creates a new promise that is fulfilled or rejected when the promise is
-  resolved.
+  Appends fulfillment and rejection handlers to the promise, and returns a new promise resolving to the return value of the called handler.
+
+- `otherwise(callable $onRejected) : PromiseInterface`
+  
+  Appends a rejection handler callback to the promise, and returns a new promise resolving to the return value of the callback if it is called, or to its original fulfillment value if the promise is instead fulfilled.
 
 - `wait($unwrap = true) : mixed`
 
@@ -394,7 +396,7 @@ $deferred = new React\Promise\Deferred();
 $reactPromise = $deferred->promise();
 
 // Create a Guzzle promise that is fulfilled with a React promise.
-$guzzlePromise = new \GuzzleHttp\Promise\Promise();
+$guzzlePromise = new GuzzleHttp\Promise\Promise();
 $guzzlePromise->then(function ($value) use ($reactPromise) {
     // Do something something with the value...
     // Return the React promise
@@ -421,7 +423,7 @@ instance.
 
 ```php
 // Get the global task queue
-$queue = \GuzzleHttp\Promise\queue();
+$queue = GuzzleHttp\Promise\Utils::queue();
 $queue->run();
 ```
 
@@ -496,6 +498,50 @@ deferred, it is a small price to pay for keeping the stack size constant.
 $promise = new Promise();
 $promise->then(function ($value) { echo $value; });
 // The promise is the deferred value, so you can deliver a value to it.
-$promise->deliver('foo');
+$promise->resolve('foo');
 // prints "foo"
 ```
+
+
+## Upgrading from Function API
+
+A static API was first introduced in 1.4.0, in order to mitigate problems with functions conflicting between global and local copies of the package. The function API will be removed in 2.0.0. A migration table has been provided here for your convenience:
+
+| Original Function | Replacement Method |
+|----------------|----------------|
+| `queue` | `Utils::queue` |
+| `task` | `Utils::task` |
+| `promise_for` | `Create::promiseFor` |
+| `rejection_for` | `Create::rejectionFor` |
+| `exception_for` | `Create::exceptionFor` |
+| `iter_for` | `Create::iterFor` |
+| `inspect` | `Utils::inspect` |
+| `inspect_all` | `Utils::inspectAll` |
+| `unwrap` | `Utils::unwrap` |
+| `all` | `Utils::all` |
+| `some` | `Utils::some` |
+| `any` | `Utils::any` |
+| `settle` | `Utils::settle` |
+| `each` | `Each::of` |
+| `each_limit` | `Each::ofLimit` |
+| `each_limit_all` | `Each::ofLimitAll` |
+| `!is_fulfilled` | `Is::pending` |
+| `is_fulfilled` | `Is::fulfilled` |
+| `is_rejected` | `Is::rejected` |
+| `is_settled` | `Is::settled` |
+| `coroutine` | `Coroutine::of` |
+
+
+## Security
+
+If you discover a security vulnerability within this package, please send an email to security@tidelift.com. All security vulnerabilities will be promptly addressed. Please do not disclose security-related issues publicly until a fix has been announced. Please see [Security Policy](https://github.com/guzzle/promises/security/policy) for more information.
+
+## License
+
+Guzzle is made available under the MIT License (MIT). Please see [License File](LICENSE) for more information.
+
+## For Enterprise
+
+Available as part of the Tidelift Subscription
+
+The maintainers of Guzzle and thousands of other packages are working with Tidelift to deliver commercial support and maintenance for the open source dependencies you use to build your applications. Save time, reduce risk, and improve code health, while paying the maintainers of the exact dependencies you use. [Learn more.](https://tidelift.com/subscription/pkg/packagist-guzzlehttp-promises?utm_source=packagist-guzzlehttp-promises&utm_medium=referral&utm_campaign=enterprise&utm_term=repo)

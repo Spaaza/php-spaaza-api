@@ -14,4 +14,4 @@ or else you will get errors about the version being skipped when you update depe
 
 ## Dependencies ##
 
-* Guzzle 6.2 (PHP >= 5.5)
+* Guzzle 7.0 (PHP >= 7.3)
