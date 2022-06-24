@@ -7,12 +7,12 @@ class APIException extends \Exception {
     /**
      * @var mixed|string
      */
-    private $name;
+    public $name;
 
     /**
      * @var mixed|string
      */
-    private $description;
+    public $description;
 
     public function __construct($error) {
         $code = array_keys($error)[0];
