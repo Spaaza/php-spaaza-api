@@ -1,15 +1,15 @@
 {
   "name": "spaaza/php-spaaza-api",
   "description": "PHP client code for interacting with the Spaaza API",
-  "version": "1.6.0",
+  "version": "1.7.0",
 
   "homepage": "http://spaaza.com/",
   "license": "MIT",
 
   "authors": [{
-    "name": "Arjan Scherpenisse",
-    "email": "arjan@miraclethings.nl",
-    "homepage": "http://www.miraclethings.nl",
+    "name": "Sam Critchley",
+    "email": "engineering@spaaza.com",
+    "homepage": "https://spaaza.com",
     "role": "Developer"
   }],
 

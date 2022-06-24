@@ -278,7 +278,12 @@ class Client
         $body = (string)$res->getBody();
         $result = json_decode($body, true);
         if ($this->throwExceptions) {
-            if (!empty($result['errors'])) {
+
+            if (!empty($result['error'])) {
+                // Handle errors the post-1.4.0 way
+                $error[] = $result['error'];
+                throw new APIException($error);
+            } else if (!empty($result['errors'])) {
                 throw new APIException($result['errors']);
             }
 
