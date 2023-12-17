@@ -200,11 +200,12 @@ class Client
      *
      * @param $path
      * @param array $params
-     * @param array $auth
+     * @param null $auth
+     * @param array $extra_headers
      * @return array
      * @throws APIException
      */
-    public function putRequest($path, array $params = array(), $auth = null, $extra_headers = array()) {
+    public function putRequest($path, array $params = array(), $auth = null, array $extra_headers = array()) {
         return $this->makeRequest('PUT', $path,
             [
                 'headers' => $this->headersForRequest($auth, $extra_headers),
@@ -228,13 +229,13 @@ class Client
         );
         if (is_array($auth)) {
             if (isset($auth['session_key']))
-                $headers['Session-Key'] = $auth['session_key'];
+                $headers['X-Spaaza-Session-Key'] = $auth['session_key'];
             if (isset($auth['user_id']))
-                $headers['Session-User-Id'] = (string)$auth['user_id'];
+                $headers['X-Spaaza-Session-User-Id'] = (string)$auth['user_id'];
             if (isset($auth['username']))
-                $headers['Session-Username'] = $auth['username'];
+                $headers['X-Spaaza-Session-Username'] = $auth['username'];
             if (isset($auth['chain_id']))
-                $headers['Session-Chain-Id'] = $auth['chain_id'];
+                $headers['X-Spaaza-Session-Chain-Id'] = $auth['chain_id'];
         } elseif (is_string($auth)) {
             $headers['Authorization'] = 'Bearer ' . $auth;
         }
