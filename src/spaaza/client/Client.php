@@ -244,7 +244,7 @@ class Client
             $headers['User-Agent'] = $this->user_agent;
 
         if (!empty($this->myprice_app_hostname))
-            $headers['X-MyPrice-App-Hostname'] = $this->myprice_app_hostname;
+            $headers['X-Spaaza-MyPrice-App-Hostname'] = $this->myprice_app_hostname;
 
         if (!empty($this->request_details))
             $headers['X-Spaaza-Request'] = json_encode($this->request_details);
