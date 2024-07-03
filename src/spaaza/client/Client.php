@@ -151,6 +151,23 @@ class Client
     }
 
     /**
+     * @param $path
+     * @param array $jsondata
+     * @param $auth
+     * @param $extra_headers
+     * @return array
+     * @throws APIException
+     */
+    public function putJSONRequest($path, array $jsondata = array(), $auth = null, $extra_headers = array()) {
+        return $this->makeRequest('PUT', $path,
+            [
+                'headers' => $this->headersForRequest($auth, $extra_headers),
+                'json' => $jsondata
+            ]
+        );
+    }
+
+    /**
      * Do an API multipart POST request.
      *
      * @param $path
