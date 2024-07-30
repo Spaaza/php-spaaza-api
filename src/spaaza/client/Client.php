@@ -79,6 +79,13 @@ class Client
         unset($this->api_version);
     }
 
+    /**
+     * @return mixed|null
+     */
+    public function getApiVersion() {
+        return $this->api_version;
+    }
+
     public function setUserAgent($user_agent) {
         $this->user_agent = $user_agent;
     }

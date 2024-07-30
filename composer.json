@@ -1,7 +1,7 @@
 {
   "name": "spaaza/php-spaaza-api",
   "description": "PHP client code for interacting with the Spaaza API",
-  "version": "1.8.4",
+  "version": "1.8.5",
 
   "homepage": "http://spaaza.com/",
   "license": "MIT",
