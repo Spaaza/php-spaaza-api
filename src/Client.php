@@ -3,6 +3,9 @@
 namespace spaaza\client;
 
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Client as Psr7Client;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -21,7 +24,8 @@ class Client
     protected $api_version = null;
     protected $x_forwarded_for;
 
-    protected $guzzle_client;
+    protected $psr7_client;
+    protected $base_uri;
 
     /**
      * Construct a client instance.
@@ -29,9 +33,10 @@ class Client
      * @param $base_url - the base URL to use: e.g. https://apitest0.spaaza.com/
      * @param bool $verify_certs whether to verify server SSL certificates
      */
-    public function __construct($base_url, $verify_certs = true)
+    public function __construct($base_url, bool $verify_certs = true)
     {
-        $this->guzzle_client = new \GuzzleHttp\Client(
+        $this->base_uri = $base_url;
+        $this->psr7_client = new Psr7Client(
             [
                 'base_uri'  => $base_url,
                 'verify'    => $verify_certs
@@ -107,11 +112,12 @@ class Client
      *
      * @param $path
      * @param array $params
-     * @param array $auth
+     * @param null $auth
+     * @param array $extra_headers
      * @return array
      * @throws APIException
      */
-    public function getRequest($path, array $params = null, $auth = null, $extra_headers = array())
+    public function getRequest($path, array $params = [], $auth = null, array $extra_headers = array()): array
     {
         return $this->makeRequest('GET', $path,
             [
@@ -126,11 +132,13 @@ class Client
      *
      * @param $path
      * @param array $params
-     * @param array $auth
+     * @param array|null $auth
+     * @param array $extra_headers
      * @return array
      * @throws APIException
      */
-    public function postRequest($path, array $params = array(), $auth = null, $extra_headers = array()) {
+    public function postRequest($path, array $params = array(), array $auth = [], array $extra_headers = []): array
+    {
         return $this->makeRequest('POST', $path,
             [
                 'headers' => $this->headersForRequest($auth, $extra_headers),
@@ -188,11 +196,11 @@ class Client
      *         'contents' => 1
      *       ],
      *       ...
-     * @param array $auth
+     * @param array|null $auth
      * @return array
      * @throws APIException
      */
-    public function postMultipartRequest($path, array $params = array(), $auth = null, $extra_headers = array()) {
+    public function postMultipartRequest($path, array $params = array(), array $auth = null, $extra_headers = array()) {
         return $this->makeRequest('POST', $path,
             [
                 'headers' => $this->headersForRequest($auth, $extra_headers),
@@ -324,13 +332,18 @@ class Client
      * @param string $path
      * @param array $params
      * @return array
-     * @throws APIException
+     * @throws APIException|GuzzleException
      */
-    protected function makeRequest($method, $path, array $params)
+    protected function makeRequest(string $method, string $path, array $params): array
     {
-        $res = null;
+        $uri = $this->base_uri . $path;
+        $headers = $this->headersForRequest($params['auth'] ?? null, $params['headers'] ?? []);
+        $body = isset($params['json']) ? json_encode($params['json']) : (isset($params['form_params']) ? http_build_query($params['form_params']) : null);
+
+        $request = new Request($method, $uri, $headers, $body);
+
         try {
-            $res = $this->guzzle_client->request($method, $path, $params);
+            $res = $this->psr7_client->send($request);
         } catch (ClientException $ce) {
             $res = $ce->getResponse();
         }
