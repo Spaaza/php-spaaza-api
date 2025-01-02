@@ -2,10 +2,11 @@
 
 namespace spaaza\client;
 
+use GuzzleHttp\Client as Psr7Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Psr7\MultipartStream;
 use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\Client as Psr7Client;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -112,12 +113,12 @@ class Client
      *
      * @param $path
      * @param array|null $params
-     * @param array|null $auth
+     * @param mixed $auth
      * @param array|null $extra_headers
      * @return array
      * @throws APIException|GuzzleException
      */
-    public function getRequest($path, ?array $params = null, ?array $auth = null, ?array $extra_headers = array()): array
+    public function getRequest($path, ?array $params = null, $auth = null, ?array $extra_headers = array()): array
     {
         return $this->makeRequest('GET', $path,
             [
@@ -132,12 +133,12 @@ class Client
      *
      * @param $path
      * @param array|null $params
-     * @param array|null $auth
+     * @param mixed $auth
      * @param array|null $extra_headers
      * @return array
      * @throws APIException|GuzzleException
      */
-    public function postRequest($path, ?array $params = null, ?array $auth = null, ?array $extra_headers = []): array
+    public function postRequest($path, ?array $params = null, $auth = null, ?array $extra_headers = []): array
     {
         return $this->makeRequest('POST', $path,
             [
@@ -152,11 +153,14 @@ class Client
      *
      * @param $path
      * @param array $jsondata
-     * @param array $auth
+     * @param mixed $auth
+     * @param array|null $extra_headers
      * @return array
      * @throws APIException
+     * @throws GuzzleException
      */
-    public function postJSONRequest($path, array $jsondata = array(), $auth = null, $extra_headers = array()) {
+    public function postJSONRequest($path, array $jsondata = array(), $auth = null, ?array $extra_headers = array()): array
+    {
         return $this->makeRequest('POST', $path,
             [
                 'headers' => $this->headersForRequest($auth, $extra_headers),
@@ -168,12 +172,12 @@ class Client
     /**
      * @param $path
      * @param array $jsondata
-     * @param $auth
-     * @param $extra_headers
+     * @param mixed $auth
+     * @param array|null $extra_headers
      * @return array
-     * @throws APIException
+     * @throws APIException|GuzzleException
      */
-    public function putJSONRequest($path, array $jsondata = array(), $auth = null, $extra_headers = array()) {
+    public function putJSONRequest($path, array $jsondata = array(), $auth = null, ?array $extra_headers = array()) {
         return $this->makeRequest('PUT', $path,
             [
                 'headers' => $this->headersForRequest($auth, $extra_headers),
@@ -196,13 +200,13 @@ class Client
      *         'contents' => 1
      *       ],
      *       ...
-     * @param array|null $auth
-     * @param array $extra_headers
+     * @param mixed $auth
+     * @param array|null $extra_headers
      * @return array
      * @throws APIException
      * @throws GuzzleException
      */
-    public function postMultipartRequest($path, array $params = array(), ?array $auth = null, $extra_headers = array()) {
+    public function postMultipartRequest($path, array $params = array(), $auth = null, ?array $extra_headers = array()) {
         return $this->makeRequest('POST', $path,
             [
                 'headers' => $this->headersForRequest($auth, $extra_headers),
@@ -216,11 +220,13 @@ class Client
      *
      * @param $path
      * @param array $params
-     * @param array $auth
+     * @param mixed $auth
+     * @param array|null $extra_headers
      * @return array
      * @throws APIException
+     * @throws GuzzleException
      */
-    public function deleteRequest($path, array $params = array(), $auth = null, $extra_headers = array()) {
+    public function deleteRequest($path, array $params = array(), $auth = null, ?array $extra_headers = array()) {
         return $this->makeRequest('DELETE', $path,
             [
                 'headers' => $this->headersForRequest($auth, $extra_headers),
@@ -234,12 +240,12 @@ class Client
      *
      * @param $path
      * @param array $params
-     * @param null $auth
-     * @param array $extra_headers
+     * @param mixed $auth
+     * @param array|null $extra_headers
      * @return array
-     * @throws APIException
+     * @throws APIException|GuzzleException
      */
-    public function putRequest($path, array $params = array(), $auth = null, array $extra_headers = array()) {
+    public function putRequest($path, array $params = array(), $auth = null, ?array $extra_headers = array()) {
         return $this->makeRequest('PUT', $path,
             [
                 'headers' => $this->headersForRequest($auth, $extra_headers),
@@ -251,11 +257,11 @@ class Client
     /**
      * Assemble the request headers.
      *
-     * @param array $auth
-     * @param array $extra_headers
+     * @param mixed $auth
+     * @param array|null $extra_headers
      * @return array
      */
-    protected function headersForRequest($auth = null, $extra_headers = array()) {
+    protected function headersForRequest($auth = null, ?array $extra_headers = array()) {
         $headers = array_merge($extra_headers, [
                 'Cache-Control' => 'private',
                 'Connection' => 'Keep-Alive'
@@ -308,7 +314,7 @@ class Client
      * @return array
      * @throws APIException
      */
-    protected function handleResponse($res)
+    protected function handleResponse($res): array
     {
         $body = (string)$res->getBody();
         $result = json_decode($body, true);
@@ -330,7 +336,7 @@ class Client
     }
 
     /**
-     * Make a request. As of 20250101 this uses PSR-7
+     * Make a request using PSR-7 methods.
      *
      * @param string $method
      * @param string $path
@@ -342,7 +348,25 @@ class Client
     {
         $uri = $this->base_uri . $path;
         $headers = $this->headersForRequest($params['auth'] ?? null, $params['headers'] ?? []);
-        $body = isset($params['json']) ? json_encode($params['json']) : (isset($params['form_params']) ? http_build_query($params['form_params']) : null);
+
+        // If the query element is set in the params array, add it to the URI, GET-style
+        if (isset($params['query'])) {
+            $uri .= '?' . http_build_query($params['query']);
+        }
+
+        // Deal with other kinds of payload and set request headers appropriately
+        if (isset($params['form_params'])) {
+            $body = http_build_query($params['form_params']);
+            $headers['Content-Type'] = 'application/x-www-form-urlencoded';
+        } elseif (isset($params['json'])) {
+            $body = json_encode($params['json']);
+            $headers['Content-Type'] = 'application/json';
+        } elseif (isset($params['multipart'])) {
+            $body = new MultipartStream($params['multipart']);
+            $headers['Content-Type'] = 'multipart/form-data';
+        } else {
+            $body = null;
+        }
 
         $request = new Request($method, $uri, $headers, $body);
 
