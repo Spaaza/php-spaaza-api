@@ -330,6 +330,8 @@ class Client
     }
 
     /**
+     * Make a request. As of 20250101 this uses PSR-7
+     *
      * @param string $method
      * @param string $path
      * @param array $params
