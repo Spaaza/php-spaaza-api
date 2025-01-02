@@ -111,13 +111,13 @@ class Client
      * Do an API GET request.
      *
      * @param $path
-     * @param array $params
-     * @param null $auth
-     * @param array $extra_headers
+     * @param array|null $params
+     * @param array|null $auth
+     * @param array|null $extra_headers
      * @return array
-     * @throws APIException
+     * @throws APIException|GuzzleException
      */
-    public function getRequest($path, array $params = [], $auth = null, array $extra_headers = array()): array
+    public function getRequest($path, ?array $params = null, ?array $auth = null, ?array $extra_headers = array()): array
     {
         return $this->makeRequest('GET', $path,
             [
@@ -131,13 +131,13 @@ class Client
      * Do an API POST request.
      *
      * @param $path
-     * @param array $params
+     * @param array|null $params
      * @param array|null $auth
-     * @param array $extra_headers
+     * @param array|null $extra_headers
      * @return array
-     * @throws APIException
+     * @throws APIException|GuzzleException
      */
-    public function postRequest($path, array $params = array(), array $auth = [], array $extra_headers = []): array
+    public function postRequest($path, ?array $params = null, ?array $auth = null, ?array $extra_headers = []): array
     {
         return $this->makeRequest('POST', $path,
             [
@@ -197,10 +197,12 @@ class Client
      *       ],
      *       ...
      * @param array|null $auth
+     * @param array $extra_headers
      * @return array
      * @throws APIException
+     * @throws GuzzleException
      */
-    public function postMultipartRequest($path, array $params = array(), array $auth = null, $extra_headers = array()) {
+    public function postMultipartRequest($path, array $params = array(), ?array $auth = null, $extra_headers = array()) {
         return $this->makeRequest('POST', $path,
             [
                 'headers' => $this->headersForRequest($auth, $extra_headers),
