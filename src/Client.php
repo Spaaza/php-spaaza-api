@@ -177,8 +177,27 @@ class Client
      * @return array
      * @throws APIException|GuzzleException
      */
-    public function putJSONRequest($path, array $jsondata = array(), $auth = null, ?array $extra_headers = array()) {
+    public function putJSONRequest($path, array $jsondata = array(), $auth = null, ?array $extra_headers = array()): array
+    {
         return $this->makeRequest('PUT', $path,
+            [
+                'headers' => $this->headersForRequest($auth, $extra_headers),
+                'json' => $jsondata
+            ]
+        );
+    }
+
+    /**
+     * @param $path
+     * @param array $jsondata
+     * @param mixed $auth
+     * @param array|null $extra_headers
+     * @return array
+     * @throws APIException|GuzzleException
+     */
+    public function patchJSONRequest($path, array $jsondata = array(), $auth = null, ?array $extra_headers = array()): array
+    {
+        return $this->makeRequest('PATCH', $path,
             [
                 'headers' => $this->headersForRequest($auth, $extra_headers),
                 'json' => $jsondata
@@ -206,7 +225,8 @@ class Client
      * @throws APIException
      * @throws GuzzleException
      */
-    public function postMultipartRequest($path, array $params = array(), $auth = null, ?array $extra_headers = array()) {
+    public function postMultipartRequest($path, array $params = array(), $auth = null, ?array $extra_headers = array()): array
+    {
         return $this->makeRequest('POST', $path,
             [
                 'headers' => $this->headersForRequest($auth, $extra_headers),
@@ -226,7 +246,8 @@ class Client
      * @throws APIException
      * @throws GuzzleException
      */
-    public function deleteRequest($path, array $params = array(), $auth = null, ?array $extra_headers = array()) {
+    public function deleteRequest($path, array $params = array(), $auth = null, ?array $extra_headers = array()): array
+    {
         return $this->makeRequest('DELETE', $path,
             [
                 'headers' => $this->headersForRequest($auth, $extra_headers),
@@ -245,7 +266,8 @@ class Client
      * @return array
      * @throws APIException|GuzzleException
      */
-    public function putRequest($path, array $params = array(), $auth = null, ?array $extra_headers = array()) {
+    public function putRequest($path, array $params = array(), $auth = null, ?array $extra_headers = array()): array
+    {
         return $this->makeRequest('PUT', $path,
             [
                 'headers' => $this->headersForRequest($auth, $extra_headers),
@@ -261,7 +283,8 @@ class Client
      * @param array|null $extra_headers
      * @return array
      */
-    protected function headersForRequest($auth = null, ?array $extra_headers = array()) {
+    protected function headersForRequest($auth = null, ?array $extra_headers = array()): array
+    {
         $headers = array_merge($extra_headers, [
                 'Cache-Control' => 'private',
                 'Connection' => 'Keep-Alive'
