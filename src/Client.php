@@ -285,7 +285,7 @@ class Client
      */
     protected function headersForRequest($auth = null, ?array $extra_headers = array()): array
     {
-        $headers = array_merge($extra_headers, [
+        $headers = array_merge($extra_headers ?? [], [
                 'Cache-Control' => 'private',
                 'Connection' => 'Keep-Alive'
             ]
