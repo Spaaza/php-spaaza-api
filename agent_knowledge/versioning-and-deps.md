@@ -9,5 +9,5 @@
 - Keep the version aligned with release notes or tags if your workflow uses them.
 
 ## Runtime Requirements
-- Requires PHP 7.3+ (via Guzzle 7) and `ext-json`.
+- Requires PHP 8.0+ (via Guzzle 7) and `ext-json`.
 - Dependencies are managed by Composer; do not edit `vendor/` manually.
