@@ -82,7 +82,7 @@ class Client
     }
 
     public function unsetApiVersion() {
-        unset($this->api_version);
+        $this->api_version = null;
     }
 
     /**
