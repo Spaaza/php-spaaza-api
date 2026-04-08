@@ -3,7 +3,7 @@
 namespace spaaza\client;
 
 use GuzzleHttp\Client as Psr7Client;
-use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\MultipartStream;
 use GuzzleHttp\Psr7\Request;
@@ -351,10 +351,10 @@ class Client
                 throw new APIException($result['errors']);
             }
 
-            return $result['results'];
+            return $result['results'] ?? [];
 
         } else {
-            return $result;
+            return $result ?? [];
         }
     }
 
@@ -395,8 +395,8 @@ class Client
 
         try {
             $res = $this->psr7_client->send($request);
-        } catch (ClientException $ce) {
-            $res = $ce->getResponse();
+        } catch (BadResponseException $e) {
+            $res = $e->getResponse();
         }
 
         return $this->handleResponse($res);
