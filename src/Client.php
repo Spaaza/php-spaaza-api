@@ -327,7 +327,12 @@ class Client
         if (!empty($this->x_forwarded_for))
             $headers['X-Forwarded-For'] = $this->x_forwarded_for;
 
-        return $headers;
+        return array_map(
+            static fn($header) => is_array($header)
+                ? array_map(static fn($value) => (string)$value, $header)
+                : (string)$header,
+            $headers
+        );
     }
 
     /**

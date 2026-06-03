@@ -11,6 +11,7 @@ This library provides a thin PHP wrapper around HTTP requests via Guzzle.
 ## Authentication & Headers
 - `$auth` can be a bearer token string or an array of session fields.
 - Array auth maps to headers like `X-Spaaza-Session-Key`, `X-Spaaza-Session-User-Id`, and `X-Spaaza-Session-Username`.
+- `headersForRequest()` normalizes scalar header values to strings before constructing PSR-7 requests. Keep this boundary normalization intact so numeric values such as chain IDs or API versions do not trigger Guzzle PSR-7 header deprecations.
 - Optional request headers can be set via setters, including:
   - `setUserAgent`, `setLocale`, `setApiVersion`, `setXForwardedFor`
   - `setOnBehalfOf`, `setUserCookie`, `setMyPriceAppHostname`
